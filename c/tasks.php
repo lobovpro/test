@@ -19,6 +19,7 @@ class Tasks extends Controller {
 	 */
 	public function index() {
 		
+		// загружаем модель задач
 		$task = self::load_model('task');
 		
 		// сортировка 
@@ -31,6 +32,7 @@ class Tasks extends Controller {
 		$sort['by'] = 'id';
 		$sort['order'] = 'desc';
 		
+		// если переданы данные сортировки/постранички
 		$data = $_GET;
 		
 		// если есть постраничка
@@ -38,7 +40,7 @@ class Tasks extends Controller {
 			$page = (int)$data['page'];
 		}
 		
-		// сортировки
+		// применяем сортировки
 		if (!empty($data['sort'])) {
 			
 			$sort['by'] = $data['sort'];
@@ -52,7 +54,6 @@ class Tasks extends Controller {
 		if ($page < 1) $page = 1;
 		$data['page'] = $page;
 		
-		
 		$data['header'] = 'Task list';
 		$data['task_list'] = Array();
 		
@@ -64,7 +65,8 @@ class Tasks extends Controller {
 		catch (Exception $e) {
 			$data['error'] = $e-> getMessage();
 		}
-		
+
+		// обрабатываем сообщение об успешном добавлении
 		if (isset($_SESSION['message'])) {
 			$data['message'] = $_SESSION['message'];
 			unset($_SESSION['message']);
@@ -85,29 +87,38 @@ class Tasks extends Controller {
 		$this-> __render('footer', $data);
 	}
 	 
-	 
 	/**
 	 *  сохраняем данные
 	 */
 	public function save() {
-		
+
+		// получаем данные
 		$data = $_POST;
 			
 		try {
+			
+			// если редактируем (id не пустой)
 			if (!empty($data['id'])) {
+				
+				// запрашиваем модель пользователя
 				$user = self::load_model('user');
+				
+				// проверяем права авторизации
 				if (!$user-> check_auth()) {
 					throw new Exception('<a href="/login/">Authorization</a> required');
 				}
 				
+				// если ошибка при передаче ID
 				$id = (int)$data['id'];
 				if (empty($id)) throw new Exception('Empty ID'); 
 				
+				// проверяем изменение поля text и ставим флаг "изменено"
 				$old_task = self::load_model('task');
 				$old_data = $old_task-> get_by_id($id);
 				if ($old_data['text'] !== $data['text']) $data['admin_edit'] = 1;
 			}
 			
+			// проверяем и сохраняем данные
 			$this-> _check_data($data);
 			$task = self::load_model('task');
 			$task-> init_by_array($data);
@@ -119,7 +130,8 @@ class Tasks extends Controller {
 			$this-> __render('task_add', $data);
 			$this-> __render('footer', $data);
 		}
-			
+		
+		// если нет ошибки - кидаем сообщение об успехе и редирект на список тасков
 		if (!$data['error']) {
 			$_SESSION['message'] = 'Success';
 			header('Location:/');
@@ -132,22 +144,26 @@ class Tasks extends Controller {
 	 */
 	public function edit() {
 		
+		// проверяем авторизацию пользователя 
+		// если не авторизован - сразу выкидываем на форму авторизации
 		$user = self::load_model('user');
 		if (!$user-> check_auth()) {
 			header('Location: /login/');
 			exit;
 		}
 		
+		// если пытаемся редактировать пустой таск
 		if (empty($_GET['id'])) throw new Exception('Empty ID'); 
 		$id = (int)$_GET['id'];
 		if (empty($id)) throw new Exception('Empty ID'); 
 		
+		// загружаем модель
 		$task = self::load_model('task');
 		$data = $task-> get_by_id($id);
 		
+		// выдаем форму
 		if (!empty($data)) {
 			$data['header'] = 'Edit task #'.$id;
-			
 			$this-> __render('header', $data);
 			$this-> __render('task_add', $data);
 			$this-> __render('footer', $data);

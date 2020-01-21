@@ -15,12 +15,12 @@ Class Model extends Core {
 		// подключаем ORM
 		require_once $_SERVER['DOCUMENT_ROOT'].'/lib/rb.php';
 		
+		// подключаемся к БД
 		try {
 			R::setup('mysql:host='.Config::DB_HOST.';dbname='.Config::DB_NAME, Config::DB_USER, Config::DB_PASSWD);
 		}
 		catch (Exception $e) {
 		}
-		
 	}
 	
 }

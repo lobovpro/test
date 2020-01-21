@@ -1,10 +1,21 @@
 <?php 
+/**
+ *  Class User
+ *  
+ *  используется для авторизации и проверки авторизации
+ */
 Class User extends Model {
 	
 	public function __construct() {
 		parent::__construct();
 	}
 	
+	/**
+	 *  попытка авторизоваться
+	 *  
+	 *  @param string $login
+	 *  @param string $password
+	 */
 	public function try_to_auth($login, $pass) {
 
 		$user = R::findOne( 'user', ' name = :login AND pass = :pass ', 
@@ -19,6 +30,9 @@ Class User extends Model {
 		}
 	}
 	
+	/**
+	 *  проверка авторизован ли пользователь
+	 */
 	public function check_auth() {
 		
 		$auth = false;
@@ -34,6 +48,9 @@ Class User extends Model {
 		return $auth;
 	}
 	
+	/**
+	 *  выход 
+	 */
 	public function logout() {
 		unset($_SESSION['user_id']);
 	}

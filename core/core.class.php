@@ -10,7 +10,6 @@ class Core {
 	 * инициализация приложения
 	 * 
 	 * @param 	string 	$request - URI
-	 * @access 	public
 	*/
 	public static function __init($request) {
 		
@@ -30,7 +29,6 @@ class Core {
 			
 			// разбиваем строку запроса на контроллер, функцию и параметры 
 			$tmp = explode('/', $request);
-			
 			if (!empty($tmp[1])) $controller = $tmp[1];
 			if (!empty($tmp[2])) $method = $tmp[2];
 		}
@@ -48,6 +46,7 @@ class Core {
 			try {
 				$app-> $method();
 			}
+			// перехватываем ошибки, возникшие при выполнении
 			catch(Exception $e) {
 				$data['header'] = 'Error';
 				$data['error'] = $e-> getMessage();
@@ -59,7 +58,7 @@ class Core {
 		}
 		catch (Exception $e) {
 			
-			// обрабатываем ошибку
+			// обрабатываем критическую ошибку
 			die('Error: '.$e-> getMessage());
 		}
 	}
