@@ -41,12 +41,11 @@ class Tasks extends Controller {
 		}
 		
 		// применяем сортировки
-		if (!empty($data['sort'])) {
-			
+		if (!empty($data['sort'])) {	
 			$sort['by'] = $data['sort'];
 			$sort['order'] = $data['order'];
-			$task-> apply_sort($sort, $sort_tpl);
 		}
+		$task-> apply_sort($sort, $sort_tpl);
 		$data['sort'] = $_SESSION['sort'];
 		$data['sort_tpl'] = $sort_tpl;
 		
