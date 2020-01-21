@@ -9,8 +9,8 @@ class Config {
 	const DEFAULT_METHOD 		= 'index';
 	
 	const DB_HOST 				= 'localhost';
-	const DB_USER 				= 'stekar';
-	const DB_PASSWD 			= 'jdQW8dMs';
+	const DB_USER 				= 'testuser';
+	const DB_PASSWD 			= 'testuserpass';
 	const DB_NAME 				= 'test';
 	
 	const DEFAULT_PER_PAGE = 3;
