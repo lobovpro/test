@@ -29,8 +29,15 @@ class Tasks extends Controller {
 		// по умолчанию
 		$page = null;
 		$sort = array();
-		$sort['by'] = 'id';
-		$sort['order'] = 'desc';
+		
+		// сортировки
+		if (isset($_SESSION['sort'])) {
+			$sort = $_SESSION['sort'];
+		}
+		else {
+			$sort['by'] = 'id';
+			$sort['order'] = 'desc';
+		}
 		
 		// если переданы данные сортировки/постранички
 		$data = $_GET;
