@@ -1,4 +1,6 @@
 <?php 
+namespace Test\M;
+use Test\Core\Model as Model;
 /**
  *  Class User
  *  
@@ -18,7 +20,7 @@ Class User extends Model {
 	 */
 	public function try_to_auth($login, $pass) {
 
-		$user = R::findOne( 'user', ' name = :login AND pass = :pass ', 
+		$user = \R::findOne( 'user', ' name = :login AND pass = :pass ', 
 		[ 
 			':login' => htmlspecialchars($login), 
 			':pass' => md5($pass) 
@@ -38,7 +40,7 @@ Class User extends Model {
 		$auth = false;
 		
 		if (!empty($_SESSION['user_id'])) {
-			$user = R::findOne( 'user', ' id = :id ', 
+			$user = \R::findOne( 'user', ' id = :id ', 
 			[
 				':id' => $_SESSION['user_id']
 			]);

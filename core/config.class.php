@@ -1,11 +1,12 @@
 <?php
+namespace Test\Core;
 /**
  * class Config  
  * отвечает за параметры по умолчанию
 */
 class Config {
 	
-	const DEFAULT_CONTROLLER 	= 'tasks';
+	const DEFAULT_CONTROLLER 	= 'Tasks';
 	const DEFAULT_METHOD 		= 'index';
 	
 	const DB_HOST 				= 'localhost';
@@ -15,7 +16,3 @@ class Config {
 	
 	const DEFAULT_PER_PAGE = 3;
 }
-
-require_once('core/core.class.php');
-require_once('core/controller.class.php');
-require_once('core/model.class.php');

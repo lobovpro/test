@@ -1,4 +1,8 @@
 <?php
+namespace Test\C;
+use Test\Core\Controller;
+use Test\M\Task;
+use Test\M\User;
 /**
  * class контроллера Tasks
  * отвечает за работу с задачами
@@ -20,7 +24,7 @@ class Tasks extends Controller {
 	public function index() {
 		
 		// загружаем модель задач
-		$task = self::load_model('task');
+		$task = new \Test\M\Task;
 		
 		// сортировка 
 		$sort_tpl['by'] = Array('id', 'name', 'email', 'text');
@@ -68,7 +72,7 @@ class Tasks extends Controller {
 			$data['task_list'] = $task-> get_list($page);
 			$data['page_count'] = $task-> get_page_count();
 		}
-		catch (Exception $e) {
+		catch (\Exception $e) {
 			$data['error'] = $e-> getMessage();
 		}
 
@@ -97,7 +101,7 @@ class Tasks extends Controller {
 	 *  сохраняем данные
 	 */
 	public function save() {
-
+		
 		// получаем данные
 		$data = $_POST;
 			
@@ -107,30 +111,30 @@ class Tasks extends Controller {
 			if (!empty($data['id'])) {
 				
 				// запрашиваем модель пользователя
-				$user = self::load_model('user');
+				$user = new \Test\M\User;
 				
 				// проверяем права авторизации
 				if (!$user-> check_auth()) {
-					throw new Exception('<a href="/login/">Authorization</a> required');
+					throw new \Exception('<a href="/login/">Authorization</a> required');
 				}
 				
 				// если ошибка при передаче ID
 				$id = (int)$data['id'];
-				if (empty($id)) throw new Exception('Empty ID'); 
+				if (empty($id)) throw new \Exception('Empty ID'); 
 				
 				// проверяем изменение поля text и ставим флаг "изменено"
-				$old_task = self::load_model('task');
+				$old_task = new \Test\M\Task;
 				$old_data = $old_task-> get_by_id($id);
 				if ($old_data['text'] !== $data['text']) $data['admin_edit'] = 1;
 			}
 			
 			// проверяем и сохраняем данные
 			$this-> _check_data($data);
-			$task = self::load_model('task');
+			$task = new \Test\M\Task;
 			$task-> init_by_array($data);
 			$task-> save();
 		}
-		catch(Exception $e) {
+		catch(\Exception $e) {
 			$data['error'] = $e-> getMessage();
 			$this-> __render('header', $data);
 			$this-> __render('task_add', $data);
@@ -152,19 +156,19 @@ class Tasks extends Controller {
 		
 		// проверяем авторизацию пользователя 
 		// если не авторизован - сразу выкидываем на форму авторизации
-		$user = self::load_model('user');
+		$user = new \Test\M\User;
 		if (!$user-> check_auth()) {
 			header('Location: /login/');
 			exit;
 		}
 		
 		// если пытаемся редактировать пустой таск
-		if (empty($_GET['id'])) throw new Exception('Empty ID'); 
+		if (empty($_GET['id'])) throw new \Exception('Empty ID'); 
 		$id = (int)$_GET['id'];
-		if (empty($id)) throw new Exception('Empty ID'); 
+		if (empty($id)) throw new \Exception('Empty ID'); 
 		
 		// загружаем модель
-		$task = self::load_model('task');
+		$task = new \Test\M\Task;
 		$data = $task-> get_by_id($id);
 		
 		// выдаем форму
@@ -186,10 +190,10 @@ class Tasks extends Controller {
 	 */
 	private function _check_data($data) {
 		
-		if (!$data['name']) throw new Exception('Name required');
-		if (!$data['email']) throw new Exception('Email required');
-		if (!preg_match('/^[^0-9][_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/i', $data['email'])) throw new Exception('Email invalid');
-		if (!$data['text']) throw new Exception('Text required');
+		if (!$data['name']) throw new \Exception('Name required');
+		if (!$data['email']) throw new \Exception('Email required');
+		if (!preg_match('/^[^0-9][_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/i', $data['email'])) throw new \Exception('Email invalid');
+		if (!$data['text']) throw new \Exception('Text required');
 		
 		return true;
 	}

@@ -1,4 +1,7 @@
 <?php
+namespace Test\C;
+use Test\Core\Controller;
+use Test\M\User;
 /**
  * class контроллера Login 
  * отвечает за авторизацию и проверку прав
@@ -30,7 +33,7 @@ class Login extends Controller {
 				$this-> _check_data($data);
 				
 				// загрузка модели
-				$user = self::load_model('user');
+				$user = new \Test\M\User;
 				
 				// авторизуемся
 				$id = $user-> try_to_auth($data['login'], $data['pass']);
@@ -44,7 +47,7 @@ class Login extends Controller {
 				else $data['error'] = 'Login error';
 			}
 			// формируем сообщение об ошибках, возникших при выполнении
-			catch (Exception $e) {
+			catch (\Exception $e) {
 				$data['error'] = $e-> getMessage();
 			}
 		}
@@ -61,7 +64,7 @@ class Login extends Controller {
 	 *  
 	 */
 	public function logout() {
-		$user = self::load_model('user');
+		$user = new \Test\M\User;
 		$user-> logout();
 		header('Location: /');
 	}
@@ -72,8 +75,8 @@ class Login extends Controller {
 	 *  @param array	$data
 	 */
 	private function _check_data($data) {
-		if (empty($data['login'])) throw new Exception('Login required');
-		if (empty($data['pass'])) throw new Exception('Password required');
+		if (empty($data['login'])) throw new \Exception('Login required');
+		if (empty($data['pass'])) throw new \Exception('Password required');
 		
 		return true;
 	}

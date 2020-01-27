@@ -1,4 +1,6 @@
 <?php
+namespace Test\Core;
+use Test\Core\Config as Config;
 /**
  * class Model 
  * отвечает за общие для всех моделей функции
@@ -12,15 +14,14 @@ Class Model extends Core {
 	 */
 	public function __construct() {
 		
-		// подключаем ORM
-		require_once $_SERVER['DOCUMENT_ROOT'].'/lib/rb.php';
-		
 		// подключаемся к БД
-		try {
-			R::setup('mysql:host='.Config::DB_HOST.';dbname='.Config::DB_NAME, Config::DB_USER, Config::DB_PASSWD);
-		}
-		catch (Exception $e) {
+		if (empty(\R::$currentDB)) {
+			try {
+				\R::setup('mysql:host='.Config::DB_HOST.';dbname='.Config::DB_NAME, Config::DB_USER, Config::DB_PASSWD);
+			}
+			catch (\Exception $e) {
+				throw new \Exception ('Ошибка подключения к БД');
+			}
 		}
 	}
-	
 }
