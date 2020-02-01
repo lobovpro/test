@@ -8,7 +8,7 @@
 				sort by <?=$v;?>
 				<?
 				foreach ($sort_tpl['order'] as $vv) {
-					if ($v == $sort['by'] && $vv == $sort['order']) {
+					if ($v == $sort && $vv == $order) {
 						echo '<strong>'.$vv.'</strong>';
 					}
 					else {

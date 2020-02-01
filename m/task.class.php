@@ -4,6 +4,13 @@ use Test\Core\Config;
 
 /**
  *  Model Task
+ *  
+ *  public methods
+ *  getList - list of Tasks
+ *  getPageCount - page count
+ *  getById - get Task by ID
+ *  initByArray - create new Task from array
+ *  save - save task
  */
 Class Task 
 {
@@ -34,10 +41,9 @@ Class Task
 			
 		// set params
 		$start = ($page-1) * Config::DEFAULT_PER_PAGE;
-		$sort = $_SESSION['sort'];
 		
 		// request 
-		$tasks = \R::findAll( 'task' , ' order by '.$sort['by'].' '.$sort['order'].' limit '.$start.','.Config::DEFAULT_PER_PAGE );
+		$tasks = \R::findAll( 'task' , ' order by '.$this-> order_by.' '.$this-> order_sort.' limit '.$start.','.Config::DEFAULT_PER_PAGE );
 		
 		return $tasks;
 	}
@@ -48,7 +54,7 @@ Class Task
 	 *  @param array $data
 	 *  @return void
 	 */
-	public function initByArray($data): void
+	public function initByArray(array $data): void
 	{
 		
 		$task = \R::dispense( 'task' );
@@ -94,24 +100,9 @@ Class Task
 		$task = \R::findOne( 'task', ' id = :id ', 
 		[
 			':id' => $id
-		])->export();
+		]);
 		if (!$task['id']) throw new \Exception('Task not found');
 		
-		return $task;
-	}
-
-	/**
-	 *  применить сортировки 
-	 *  
-	 *  @param array $sort - установить эти сортировки
-	 *  @param array $sort_tpl - шаблоны сортировок
-	 */
-	public function applySort($sort, $sort_tpl) 
-	{
-		if (!in_array($sort['by'], $sort_tpl['by'])) throw new \Exception('Sort by error');
-		if (!in_array($sort['order'], $sort_tpl['order'])) throw new \Exception('Sort order error');
-		
-		$_SESSION['sort']['by'] = $sort['by'];
-		$_SESSION['sort']['order'] = $sort['order'];
+		return $task->export();
 	}
 }

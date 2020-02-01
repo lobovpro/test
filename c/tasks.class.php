@@ -1,7 +1,7 @@
 <?php
 namespace Test\C;
-use Test\Core\Controller;
-use Test\M\{Task, User};
+use Test\Core\{Config, Controller};
+use Test\M\{Task, Order, User};
 
 /**
  *  Controller Tasks
@@ -22,67 +22,57 @@ class Tasks extends Controller
 	 */
 	public function index(): void 
 	{
-		
-		// загружаем модель задач
-		$task = new \Test\M\Task;
-		
-		// сортировка 
-		$sort_tpl['by'] = Array('id', 'name', 'email', 'text');
-		$sort_tpl['order'] = Array('asc', 'desc');
-		
-		// по умолчанию
 		$page = null;
-		$sort = array();
-		
-		// сортировки
-		if (isset($_SESSION['sort'])) {
-			$sort = $_SESSION['sort'];
-		}
-		else {
-			$sort['by'] = 'id';
-			$sort['order'] = 'desc';
-		}
-		
-		// если переданы данные сортировки/постранички
 		$data = $_GET;
 		
-		// если есть постраничка
+		// set new page from params
 		if (!empty($data['page'])) {
 			$page = (int)$data['page'];
 		}
-		
-		// применяем сортировки
-		if (!empty($data['sort'])) {	
-			$sort['by'] = $data['sort'];
-			$sort['order'] = $data['order'];
-		}
-		$task-> applySort($sort, $sort_tpl);
-		$data['sort'] = $_SESSION['sort'];
-		$data['sort_tpl'] = $sort_tpl;
-		
-		// если страница не указана - берем первую 
 		if ($page < 1) $page = 1;
-		$data['page'] = $page;
 		
-		$data['header'] = 'Task list';
-		$data['task_list'] = Array();
-		
-		// запрашиваем список 
-		try {
-			$data['task_list'] = $task-> getList($page);
-			$data['page_count'] = $task-> getPageCount();
+		$data['task_list'] = array();
+		try { 
+			// set new sorts from params
+			if (!empty($data['sort'])) {	
+				\Test\M\Order::setOrder($data['sort'], $data['order']);
+			}
 		}
 		catch (\Exception $e) {
 			$data['error'] = $e-> getMessage();
 		}
-
-		// обрабатываем сообщение об успешном добавлении
+		
+		try {
+			// main model
+			$task = new \Test\M\Task;
+			
+			// apply order 
+			\Test\M\Order::applyOrder($task);
+			
+			// get data
+			$data['task_list'] = $task-> getList($page);
+			$data['page_count'] = $task-> getPageCount();
+			$data['sort'] = $task-> order_by;
+			$data['order'] = $task-> order_sort;
+		}
+		catch (\Exception $e) {
+			$data['error'] = $e-> getMessage();
+		}
+		
+		// set params for template
+		$data['header'] = 'Task list';
+		$data['page'] = $page;
+		$data['sort_tpl']['by'] = Config::PERMITTED_ORDER_BY;
+		$data['sort_tpl']['order'] = Config::PERMITTED_ORDER;
+		
+		
+		// add message if exists
 		if (isset($_SESSION['message'])) {
 			$data['message'] = $_SESSION['message'];
 			unset($_SESSION['message']);
 		}
 		
-		// выводим
+		// render
 		$this-> render('task_list', $data);
 	}
 	
