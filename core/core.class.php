@@ -1,69 +1,76 @@
 <?php
 namespace Test\Core;
-use Test\Core\Config as Config;
-use Test\C\Tasks as Tasks;
-use Test\C\Login as Login;
+use Test\Core\Config;
+use Test\C\{Tasks, Login};
+
 /**
- * class Core 
- * отвечает за инициализацию
- * маршрутизацию, автозагрузку классов и вызов требуемого контроллера
-*/
-class Core {
+ * Core 
+ * 
+ * init aplication and request controller
+ * 
+ * static function __init
+ */
+class Core 
+{
 	
 	/**
-	 * инициализация приложения
-	 * 
-	 * @param 	string 	$request - URI
-	*/
-	public static function __init($request) {
-		
-		// контроллер по умолчанию 
+	 *  @brief init app
+	 *  
+	 *  @param string $request URI
+	 *  @throws Exception
+	 */
+	public static function init(string $request): void 
+	{
+		// set controller by default
 		$controller = Config::DEFAULT_CONTROLLER;
 		$method = Config::DEFAULT_METHOD;
 		
-		// если строка не пустая, обрабатываем
+		// if request is not empty - process string
 		if (!empty($request)) {
 			
-			// отбрасываем GET-параметры
+			// drop $_GET params
 			if (strpos($request, '?') !== false) {
 				
 				$tmp = explode('?', $request);
 				$request = $tmp[0];
 			}
 			
-			// разбиваем строку запроса на контроллер, функцию и параметры 
+			// get controller and method names
 			$tmp = explode('/', $request);
 			if (!empty($tmp[1])) $controller = $tmp[1];
 			if (!empty($tmp[2])) $method = $tmp[2];
 		}
 		
-		// пробуем обратиться к контроллеру 
+		// connect DB
+		self::dbConnect();
+	
+		// use controller
+		$controller = '\\Test\\C\\'.$controller;
+		$app = new $controller;
+		
+		// method
 		try {
-			
-			// загружаем контроллер 
-			$controller = '\\Test\\C\\'.$controller;
-			$app = new $controller;
-			
-			// если не найден метод - бросаем ошибку
-			if (!method_exists($controller, $method)) throw new \Exception('Method "'.$method.'" doesn\'t exist in controller "'.$controller.'"');
-			
-			// вызываем метод
-			try {
-				$app-> $method();
-			}
-			// перехватываем ошибки, возникшие при выполнении
-			catch(\Exception $e) {
-				$data['header'] = 'Error';
-				$data['error'] = $e-> getMessage();
-				$app-> __render('header', $data);
-				$app-> __render('error', $data);
-				$app-> __render('footer', $data);
-			}
+			$app-> $method();
+		} 
+		// errors within a controller
+		catch(\Exception $e) {
+			$data['header'] = 'Error';
+			$data['error'] = $e-> getMessage();
+			$app-> render('error', $data);
 		}
-		catch (\Exception $e) {
-			
-			// обрабатываем критическую ошибку
-			die('Error: '.$e-> getMessage());
+	}
+	
+	private static function dbConnect(): void 
+	{
+		if (empty(\R::$currentDB)) {
+			\R::setup('mysql:host='.Config::DB_HOST.';dbname='.Config::DB_NAME, Config::DB_USER, Config::DB_PASSWD);
+		}
+		
+		if (!\R::count( 'user' )) {
+			$user = \R::dispense('user');
+			$user-> name = 'admin';
+			$user-> pass = md5('123');
+			$id = \R::store($user);
 		}
 	}
 }

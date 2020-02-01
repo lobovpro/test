@@ -10,7 +10,7 @@
     } 
     ?>
     
-    <form action="/login/" class="col" method="post">
+    <form action="/login/auth/" class="col" method="post">
 		<div class="form-group">
 			<label for="name">User</label>
 			<input class="form-control" type="text" name="login" required value="<?=$login ? $login : '';?>">

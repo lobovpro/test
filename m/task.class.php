@@ -1,48 +1,55 @@
 <?php
 namespace Test\M;
-use Test\Core\Model as Model;
-use Test\Core\Config as Config;
+use Test\Core\Config;
+
 /**
- *  Task Class
+ *  Model Task
  */
-Class Task extends Model {
-	
-	public function __construct() {
-		parent::__construct();
-	}
+Class Task 
+{
+	public $order_by;
+	public $order_sort;
 	
 	/**
-	 *  get task list
-	 *  
-	 *  @param integer $page - номер страницы для постранички
-	 *  @return array $tasks - список тасков
-	 *  @throws Exception 
+	 *  @brief init filters
 	 */
-	public function get_list($page) {
+	public function __construct() 
+	{
+		$this-> order_by = Config::DEFAULT_ORDER_BY;
+		$this-> order_sort = Config::DEFAULT_ORDER_SORT;
+	}
+	 
+	/**
+	 *  @brief get task list
+	 *  
+	 *  @param int $page page num for pager 
+	 *  @return List of RB classes
+	 *	@throws Exception
+	 */
+	public function getList(int $page): array
+	{
 		
-		// если есть, что возвращать
-		if (\R::count( 'task' )) {
+		// if tasks > 0
+		if (!\R::count( 'task' )) throw new \Exception('Empty table task');
 			
-			// формируем параметры запроса
-			$start = ($page-1) * Config::DEFAULT_PER_PAGE;
-			$sort = $_SESSION['sort'];
-			
-			// запрашиваем 
-			$tasks = \R::findAll( 'task' , ' order by '.$sort['by'].' '.$sort['order'].' limit '.$start.','.Config::DEFAULT_PER_PAGE );
-			
-			return $tasks;
-		}
-		else {
-			throw new \Exception('Empty table task');
-		}
+		// set params
+		$start = ($page-1) * Config::DEFAULT_PER_PAGE;
+		$sort = $_SESSION['sort'];
+		
+		// request 
+		$tasks = \R::findAll( 'task' , ' order by '.$sort['by'].' '.$sort['order'].' limit '.$start.','.Config::DEFAULT_PER_PAGE );
+		
+		return $tasks;
 	}
 	
 	/**
-	 *  @brief формируем таск из массива
+	 *  @brief init task from array data
 	 *  
-	 *  @param array $data - данные таска
+	 *  @param array $data
+	 *  @return void
 	 */
-	public function init_by_array($data) {
+	public function initByArray($data): void
+	{
 		
 		$task = \R::dispense( 'task' );
 		foreach ($data as $k=> $v) {
@@ -52,36 +59,44 @@ Class Task extends Model {
 	}
 
 	/**
-	 *  сохранить таск
+	 *  @brief save task
 	 *  
+	 *  @return void
 	 *  @throws Exception
 	 */
-	public function save() {
+	public function save(): bool
+	{
 		$id = \R::store( $this-> task );
 		if (!$id) throw new \Exception('Save error');
 		return true;
 	}
 	
 	/**
-	 *  @brief количество страниц
+	 *  @brief get page count for tasks
 	 *  
+	 *  @return int 
 	 */
-	public function get_page_count() {
+	public function getPageCount(): int 
+	{
 		\R::count( 'task' );
 		$page_count = ceil(\R::count( 'task' ) / Config::DEFAULT_PER_PAGE);
 		return $page_count;
 	}
 
 	/**
-	 *  получить таск из базы по идентификатору
+	 *  @brief init task by id
 	 *  
-	 *  @param integer $id
+	 *  @param int $id 
+	 *  @return array
 	 */
-	public function get_by_id($id) {
+	public function getById(int $id): array
+	{
 		$task = \R::findOne( 'task', ' id = :id ', 
 		[
 			':id' => $id
-		]);
+		])->export();
+		if (!$task['id']) throw new \Exception('Task not found');
+		
 		return $task;
 	}
 
@@ -91,7 +106,8 @@ Class Task extends Model {
 	 *  @param array $sort - установить эти сортировки
 	 *  @param array $sort_tpl - шаблоны сортировок
 	 */
-	public function apply_sort($sort, $sort_tpl) {
+	public function applySort($sort, $sort_tpl) 
+	{
 		if (!in_array($sort['by'], $sort_tpl['by'])) throw new \Exception('Sort by error');
 		if (!in_array($sort['order'], $sort_tpl['order'])) throw new \Exception('Sort order error');
 		

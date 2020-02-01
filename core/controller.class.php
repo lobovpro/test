@@ -1,37 +1,55 @@
 <?php
 namespace Test\Core;
-use \Test\M\User;
+use Test\M\User;
+
 /**
  * class Controller
- * отвечает за общие для всех контроллеров методы
-*/
-Class Controller Extends Core {
-	
-	public function __construct() {
-	}
+ * 
+ */
+Abstract Class Controller 
+{
 	
 	/**
-	 *  рендерим вывод
+	 *  @brief render view
 	 *  
-	 *  @param string 	$viewname имя view 
-	 *  @param array	$data - параметры, которые должны быть выведены в шаблоне
+	 *  @param string 	$viewname 
+	 *  @param array	$data
+	 *  
+	 *  @return void
+	 *  
+	 *  @throws Exception
 	 */
-	public function __render($viewname, $data = null) {
+	public function render(string $viewname, array $data = []): void 
+	{
 		
-		// если не найден - бросаем ошибку
+		// if view doesn't exist
 		if (!file_exists($_SERVER['DOCUMENT_ROOT'].'/v/'.$viewname.'.php')) throw new \Exception('"'.$viewname.'" doesn\'t exist', 1);
 		
-		// переводим массив $data в переменные
+		// $data to $vars conversion
 		if (isset($data) && count($data)) foreach($data as $k=>$v) {
 			$$k = $v;
 		}
 		
-		// проверяем, авторизован ли администратор
-		$user = new \Test\M\User;
-		if ($user-> check_auth()) $admin = true;
-		else $admin = false;
+		// is admin authorized
+		$admin = \Test\M\User::checkAuth();
 		
-		// запрашиваем view
+		// view
+		require($_SERVER['DOCUMENT_ROOT'].'/v/header.php');
 		require($_SERVER['DOCUMENT_ROOT'].'/v/'.$viewname.'.php');
+		require($_SERVER['DOCUMENT_ROOT'].'/v/footer.php');
+	}
+	
+	/**
+	 *  @brief intercepts undefined methods query
+	 *  
+	 *  @param string $method 
+	 *  @param array $params
+	 *  
+	 *  @return void
+	 */
+	public function __call(string $method, array $params): void
+	{
+		$controller = str_replace(__NAMESPACE__.'\\', '', __CLASS__);
+		throw new \Exception('Method "'.$method.'" doesn\'t exist in controller "'.$controller.'"');
 	}
 }

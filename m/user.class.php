@@ -1,25 +1,29 @@
 <?php 
 namespace Test\M;
-use Test\Core\Model as Model;
+
 /**
- *  Class User
+ *  Model User
  *  
- *  используется для авторизации и проверки авторизации
+ *  use static functions 
+ *  tryToAuth
+ *  checkAuth
+ *  logout
  */
-Class User extends Model {
-	
-	public function __construct() {
-		parent::__construct();
-	}
+Class User 
+{
 	
 	/**
-	 *  попытка авторизоваться
+	 *  auth admin
 	 *  
 	 *  @param string $login
 	 *  @param string $password
+	 *  @return int $user_id
 	 */
-	public function try_to_auth($login, $pass) {
+	public static function tryToAuth(string $login, string $pass): int 
+	{
 
+		$user_id = 0;
+		
 		$user = \R::findOne( 'user', ' name = :login AND pass = :pass ', 
 		[ 
 			':login' => htmlspecialchars($login), 
@@ -28,15 +32,19 @@ Class User extends Model {
 		
 		if (!empty($user) && $user-> id) {
 			$_SESSION['user_id'] = $user-> id;
-			return $user-> id;
+			$user_id = $user-> id;
 		}
+		
+		return $user_id;
 	}
 	
 	/**
-	 *  проверка авторизован ли пользователь
+	 *  check is admin authorized
+	 *  
+	 *  @return bool
 	 */
-	public function check_auth() {
-		
+	public static function checkAuth(): bool 
+	{
 		$auth = false;
 		
 		if (!empty($_SESSION['user_id'])) {
@@ -51,9 +59,10 @@ Class User extends Model {
 	}
 	
 	/**
-	 *  выход 
+	 *  logout user
 	 */
-	public function logout() {
+	public static function logout(): void 
+	{
 		unset($_SESSION['user_id']);
 	}
 }

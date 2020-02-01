@@ -1,27 +1,27 @@
 <?php
 namespace Test\C;
 use Test\Core\Controller;
-use Test\M\Task;
-use Test\M\User;
-/**
- * class контроллера Tasks
- * отвечает за работу с задачами
-*/
-class Tasks extends Controller {
+use Test\M\{Task, User};
 
-	/**
-	 *  инициируем таски
-	 *  
-	 */
-	public function __construct() {
-		parent::__construct();
-	}
+/**
+ *  Controller Tasks
+ *  
+ *  provides public methods
+ *  index - render the list of tasks
+ *  add - render the add form
+ *  save - try to save the task from the edit ar add form
+ *  edit - render edit form for task
+ */
+class Tasks extends Controller 
+{	
 	
 	/**
-	 *  список задач с постраничкой
+	 *  @brief get and render task list
 	 *  
+	 *  @return void
 	 */
-	public function index() {
+	public function index(): void 
+	{
 		
 		// загружаем модель задач
 		$task = new \Test\M\Task;
@@ -56,7 +56,7 @@ class Tasks extends Controller {
 			$sort['by'] = $data['sort'];
 			$sort['order'] = $data['order'];
 		}
-		$task-> apply_sort($sort, $sort_tpl);
+		$task-> applySort($sort, $sort_tpl);
 		$data['sort'] = $_SESSION['sort'];
 		$data['sort_tpl'] = $sort_tpl;
 		
@@ -69,8 +69,8 @@ class Tasks extends Controller {
 		
 		// запрашиваем список 
 		try {
-			$data['task_list'] = $task-> get_list($page);
-			$data['page_count'] = $task-> get_page_count();
+			$data['task_list'] = $task-> getList($page);
+			$data['page_count'] = $task-> getPageCount();
 		}
 		catch (\Exception $e) {
 			$data['error'] = $e-> getMessage();
@@ -83,65 +83,72 @@ class Tasks extends Controller {
 		}
 		
 		// выводим
-		$this-> __render('header', $data);
-		$this-> __render('task_list', $data);
-		$this-> __render('footer', $data);
+		$this-> render('task_list', $data);
 	}
 	
 	/**
-	 *  форма добавления
+	 *  @brief render add form
+	 *  
+	 *  @return void
 	 */
-	public function add() {
-		$this-> __render('header', $data);
-		$this-> __render('task_add', $data);
-		$this-> __render('footer', $data);
+	public function add(): void 
+	{
+		
+		// preset data
+		$data['header'] = 'Add task';
+		$data['id'] = '';
+		$data['name'] = '';
+		$data['email'] = '';
+		$data['text'] = '';
+		
+		// render add form
+		$this-> render('task_add', $data);
 	}
 	 
 	/**
-	 *  сохраняем данные
+	 *  @brief save task
+	 *  
+	 *  @return void
 	 */
-	public function save() {
+	public function save(): void
+	{
 		
-		// получаем данные
+		// get data - _POST only
 		$data = $_POST;
 			
 		try {
 			
-			// если редактируем (id не пустой)
+			// if edit task
 			if (!empty($data['id'])) {
 				
-				// запрашиваем модель пользователя
-				$user = new \Test\M\User;
-				
-				// проверяем права авторизации
-				if (!$user-> check_auth()) {
+				// check admin auth
+				if (!\Test\M\User::checkAuth()) {
 					throw new \Exception('<a href="/login/">Authorization</a> required');
 				}
 				
-				// если ошибка при передаче ID
+				// if ID error
 				$id = (int)$data['id'];
 				if (empty($id)) throw new \Exception('Empty ID'); 
 				
-				// проверяем изменение поля text и ставим флаг "изменено"
+				// check if task is changed
 				$old_task = new \Test\M\Task;
-				$old_data = $old_task-> get_by_id($id);
+				$old_data = $old_task-> getById($id);
 				if ($old_data['text'] !== $data['text']) $data['admin_edit'] = 1;
 			}
 			
-			// проверяем и сохраняем данные
-			$this-> _check_data($data);
+			// check and save
+			$this-> _checkData($data);
 			$task = new \Test\M\Task;
-			$task-> init_by_array($data);
+			$task-> initByArray($data);
 			$task-> save();
 		}
 		catch(\Exception $e) {
 			$data['error'] = $e-> getMessage();
-			$this-> __render('header', $data);
-			$this-> __render('task_add', $data);
-			$this-> __render('footer', $data);
+			$data['header'] = 'Add task';
+			$this-> render('task_add', $data);
 		}
 		
-		// если нет ошибки - кидаем сообщение об успехе и редирект на список тасков
+		// redirect to list
 		if (!$data['error']) {
 			$_SESSION['message'] = 'Success';
 			header('Location:/');
@@ -150,33 +157,31 @@ class Tasks extends Controller {
 	}
 	
 	/**
-	 *  редактирование
+	 *  @brief render edit form
+	 *  
+	 *  @return void
+	 *  @throws Exception
 	 */
-	public function edit() {
+	public function edit(): void
+	{
 		
-		// проверяем авторизацию пользователя 
-		// если не авторизован - сразу выкидываем на форму авторизации
-		$user = new \Test\M\User;
-		if (!$user-> check_auth()) {
+		// check admin auth
+		if (!\Test\M\User::checkAuth()) {
 			header('Location: /login/');
 			exit;
 		}
 		
-		// если пытаемся редактировать пустой таск
-		if (empty($_GET['id'])) throw new \Exception('Empty ID'); 
-		$id = (int)$_GET['id'];
-		if (empty($id)) throw new \Exception('Empty ID'); 
+		// if ID error
+		if (empty($_GET['id']) || !$id = (int)$_GET['id']) throw new \Exception('Empty ID'); 
 		
-		// загружаем модель
+		// load Task data
 		$task = new \Test\M\Task;
-		$data = $task-> get_by_id($id);
+		$data = $task-> getById($id);
 		
-		// выдаем форму
+		// edit form
 		if (!empty($data)) {
 			$data['header'] = 'Edit task #'.$id;
-			$this-> __render('header', $data);
-			$this-> __render('task_add', $data);
-			$this-> __render('footer', $data);
+			$this-> render('task_add', $data);
 		}
 		else {
 			$data['error'] = 'Task #'.$id.' not found';
@@ -184,11 +189,14 @@ class Tasks extends Controller {
 	}
 	
 	/**
-	 *  проверка данных
+	 *  @brief check data
 	 *  
-	 *  @param array	$data
+	 *  @param array $data [name, email, text etc]
+	 *  @return bool
+	 *  @throws Exception
 	 */
-	private function _check_data($data) {
+	private function _checkData(array $data): bool 
+	{
 		
 		if (!$data['name']) throw new \Exception('Name required');
 		if (!$data['email']) throw new \Exception('Email required');

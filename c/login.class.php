@@ -2,79 +2,95 @@
 namespace Test\C;
 use Test\Core\Controller;
 use Test\M\User;
+
 /**
- * class контроллера Login 
- * отвечает за авторизацию и проверку прав
-*/
-class Login extends Controller {
+ *  Controller Login
+ *  
+ *  provides public methods
+ *  index - render login form
+ *  auth - login user
+ *  logout - logout user
+ */
+class Login extends Controller 
+{
 	
 	/**
-	 *  консруктор
+	 *  @brief render auth form
 	 *  
+	 *  @return void
 	 */
-	public function __construct() {
-		parent::__construct();
+	public function index(): void 
+	{
+
+		// if data
+		$data = $_POST;
+		if (!count($data)) {
+			$data['login'] = '';
+			$data['pass'] = '';
+		}
+
+		// render form
+		$data['header'] = 'Login';
+		$this-> render('login_form', $data);
 	}
 	
 	/**
-	 *  обработчик по умолчанию - вывод формы авторизации и попытка авторизации
+	 *  @brief auth user
 	 *  
+	 *  @return void
+	 *  @throws Exception
 	 */
-	public function index() {
-
-		// если переданы данные из формы
+	public function auth(): void 
+	{
 		$data = $_POST;
+		
 		if (count($data)) {
 			
-			// пробуем авторизоваться
+			// try to auth
 			try {
-				
-				// проверка данных
-				$this-> _check_data($data);
-				
-				// загрузка модели
-				$user = new \Test\M\User;
-				
-				// авторизуемся
-				$id = $user-> try_to_auth($data['login'], $data['pass']);
 			
-				// если успешно - прыгаем на главную
+				$this-> _check_data($data);
+				$id = \Test\M\User::tryToAuth($data['login'], $data['pass']);
+			
+				// go to index if success
 				if ($id) {
 					header('Location: /');
 				}
 				
-				// иначе выдаем ошибку
-				else $data['error'] = 'Login error';
+				// otherwise error 
+				throw new \Exception('Login error');
 			}
-			// формируем сообщение об ошибках, возникших при выполнении
+			// error output
 			catch (\Exception $e) {
 				$data['error'] = $e-> getMessage();
 			}
 		}
-
-		// выводим форму авторизации
+		
+		// render form
 		$data['header'] = 'Login';
-		$this-> __render('header', $data);
-		$this-> __render('login_form', $data);
-		$this-> __render('footer', $data);
+		$this-> render('login_form', $data);
 	}
 	
 	/**
-	 *  разлогиниваем пользователя
+	 *  @brief user logout request
 	 *  
+	 *  @return void
 	 */
-	public function logout() {
-		$user = new \Test\M\User;
-		$user-> logout();
+	public function logout(): void
+	{
+		\Test\M\User::logout();
 		header('Location: /');
 	}
 	
 	/**
-	 *  проверка данных
+	 *  @brief check auth data
 	 *  
-	 *  @param array	$data
+	 *  @param array $data [login, pass]
+	 *  @return bool
+	 *  @throws Exception
 	 */
-	private function _check_data($data) {
+	private function _check_data(array $data): bool 
+	{
 		if (empty($data['login'])) throw new \Exception('Login required');
 		if (empty($data['pass'])) throw new \Exception('Password required');
 		
