@@ -10,6 +10,9 @@
 <body>
     <header class="container mb-5">
 		<div class="row">
+			<div class="col">
+				<a href="/">Tasks</a>
+			</div>
             <div class="col">
             <?
 			if ($admin) {
