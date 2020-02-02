@@ -16,5 +16,5 @@ try {
 catch (\Error $e) {
 	
 	// Critical errors
-	die('Error: '.$e-> getMessage());
+	die($e-> getMessage() . ' in ' . $e-> getFile() . ':' . $e-> getLine());
 }
