@@ -29,15 +29,16 @@ class Core
 			self::_route($request, $controller_name, $method_name);
 		}
 		
-		// connect DB
-		self::_dbConnect();
-	
 		// use factory
 		$factory = '\\Test\\C\\Controller';
 		$app = new $factory();
 		
-		// init controller
+		// handle errors within controller
 		try {
+			// connect DB
+			self::_dbConnect();
+			
+			// init controller
 			$app = $app-> init($controller_name);
 			$app-> $method_name();
 		} 
@@ -57,7 +58,27 @@ class Core
 	private static function _dbConnect(): void 
 	{
 		if (empty(\R::$currentDB)) {
-			\R::setup('mysql:host='.Config::DB_HOST.';dbname='.Config::DB_NAME, Config::DB_USER, Config::DB_PASSWD);
+			switch (Config::DB_DRIVER) {
+				case 'mysql':
+					if (!is_string(Config::MYSQL_HOST) || !strlen(Config::MYSQL_HOST)) throw new \Exception('Mysql host undefined');
+					if (!is_string(Config::MYSQL_NAME) || !strlen(Config::MYSQL_NAME)) throw new \Exception('Mysql DB name undefined');
+					if (!is_string(Config::MYSQL_USER) || !strlen(Config::MYSQL_USER)) throw new \Exception('Mysql user undefined');
+					if (!is_string(Config::MYSQL_PASSWD) || !strlen(Config::MYSQL_HOST)) throw new \Exception('Mysql password undefined');
+				
+					\R::setup('mysql:host='.Config::MYSQL_HOST.';dbname='.Config::MYSQL_NAME, Config::MYSQL_USER, Config::MYSQL_PASSWD);
+					break;
+				case 'sqlite':
+					$sqlite_full_path = $_SERVER['DOCUMENT_ROOT'] . Config::SQLITE_STORAGE;
+					if (!is_string(Config::SQLITE_STORAGE) || !strlen(Config::SQLITE_STORAGE)) throw new \Exception('SQLite storage undefined');
+					if (!is_file($sqlite_full_path)) throw new \Exception('SQLite storage ' . $sqlite_full_path . ' doesn\'t exist');
+					
+					\R::setup( 'sqlite:'.$sqlite_full_path );
+					break;
+				default: 
+					throw new \Exception('Database driver ' . Config::DB_DRIVER . ' unknown');
+					break;
+			}
+			
 		}
 		
 		if (!\R::count( 'user' )) {

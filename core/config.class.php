@@ -8,11 +8,14 @@ namespace Test\Core;
  */
 class Config 
 {
+	const DB_DRIVER				= 'sqlite'; // sqlite | mysql
 	
-	const DB_HOST 				= '127.0.0.1';
-	const DB_USER 				= 'lobov';
-	const DB_PASSWD 			= 'cntrfh12k';
-	const DB_NAME 				= 'lobov_ticket';
+	const SQLITE_STORAGE		= '/../data/test.db';
+	
+	const MYSQL_HOST 			= '';
+	const MYSQL_USER 			= '';
+	const MYSQL_PASSWD 			= '';
+	const MYSQL_NAME 			= '';
 	
 	const DEFAULT_CONTROLLER 	= 'Tasks';
 	const DEFAULT_METHOD 		= 'index';
