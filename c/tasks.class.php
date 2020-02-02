@@ -1,6 +1,7 @@
 <?php
 namespace Test\C;
-use Test\Core\{Config, Controller};
+use Test\Core\Config;
+use Test\C\Controller;
 use Test\M\{Task, Order, User};
 
 /**
@@ -14,6 +15,14 @@ use Test\M\{Task, Order, User};
  */
 class Tasks extends Controller 
 {	
+	/**
+	 *  @brief deprecate parent functionality
+	 *  
+	 *  @return void
+	 */
+	public function __construct()
+	{
+	}
 	
 	/**
 	 *  @brief get and render task list
@@ -83,7 +92,6 @@ class Tasks extends Controller
 	 */
 	public function add(): void 
 	{
-		
 		// preset data
 		$data['header'] = 'Add task';
 		$data['id'] = '';
@@ -102,7 +110,6 @@ class Tasks extends Controller
 	 */
 	public function save(): void
 	{
-		
 		// get data - _POST only
 		$data = $_POST;
 			
@@ -154,7 +161,6 @@ class Tasks extends Controller
 	 */
 	public function edit(): void
 	{
-		
 		// check admin auth
 		if (!\Test\M\User::checkAuth()) {
 			header('Location: /login/');
@@ -187,7 +193,6 @@ class Tasks extends Controller
 	 */
 	private function _checkData(array $data): bool 
 	{
-		
 		if (!$data['name']) throw new \Exception('Name required');
 		if (!$data['email']) throw new \Exception('Email required');
 		if (!preg_match('/^[^0-9][_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/i', $data['email'])) throw new \Exception('Email invalid');

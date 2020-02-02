@@ -1,13 +1,25 @@
 <?php
-namespace Test\Core;
+namespace Test\C;
 use Test\M\User;
 
 /**
- * class Controller
- * 
+ *  class Controller
+ *  
+ *  factory class for Controllers
  */
-Abstract Class Controller 
+Class Controller 
 {
+	/**
+	 *  @brief create new instance of requested controller
+	 *  
+	 *  @param string $type
+	 *  @return Controller::class
+	 */
+	public function init(string $type): Controller
+	{
+		$controller = '\\Test\\C\\'.$type;
+		return new $controller;
+	}
 	
 	/**
 	 *  @brief render view

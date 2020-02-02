@@ -1,6 +1,6 @@
 <?php
 namespace Test\C;
-use Test\Core\Controller;
+use Test\C\Controller;
 use Test\M\User;
 
 /**
@@ -13,6 +13,14 @@ use Test\M\User;
  */
 class Login extends Controller 
 {
+	/**
+	 *  @brief deprecate parent functionality
+	 *  
+	 *  @return void
+	 */
+	public function __construct() 
+	{
+	}
 	
 	/**
 	 *  @brief render auth form
