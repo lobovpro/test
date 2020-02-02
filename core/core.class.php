@@ -78,7 +78,6 @@ class Core
 					throw new \Exception('Database driver ' . Config::DB_DRIVER . ' unknown');
 					break;
 			}
-			
 		}
 		
 		if (!\R::count( 'user' )) {

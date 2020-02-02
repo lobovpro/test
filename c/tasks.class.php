@@ -59,10 +59,10 @@ class Tasks extends Controller
 			\Test\M\Order::applyOrder($task);
 			
 			// get data
-			$data['task_list'] = $task-> getList($page);
-			$data['page_count'] = $task-> getPageCount();
 			$data['sort'] = $task-> order_by;
 			$data['order'] = $task-> order_sort;
+			$data['task_list'] = $task-> getList($page);
+			$data['page_count'] = $task-> getPageCount();
 		}
 		catch (\Exception $e) {
 			$data['error'] = $e-> getMessage();
@@ -73,7 +73,6 @@ class Tasks extends Controller
 		$data['page'] = $page;
 		$data['sort_tpl']['by'] = Config::PERMITTED_ORDER_BY;
 		$data['sort_tpl']['order'] = Config::PERMITTED_ORDER;
-		
 		
 		// add message if exists
 		if (isset($_SESSION['message'])) {
