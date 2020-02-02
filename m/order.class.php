@@ -19,13 +19,12 @@ Class Order
 	 *  @brief set filters 
 	 *  
 	 *  @param Task $task 
-	 *  @throws Exception
 	 */
 	public static function applyOrder(\Test\M\Task $task): void
 	{
-		$sort = $_SESSION['sort'];
-		if (!empty($sort['by'])) $task-> order_by = $sort['by'];
-		if (!empty($sort['order'])) $task-> order_sort = $sort['order'];
+		$sort = $_SESSION['sort'] ?? null;
+		$task-> order_by = $sort['by'] ?? $task-> order_by;
+		$task-> order_sort = $sort['order'] ?? $task-> order_sort;
 	}
 	 
 	/**
@@ -34,6 +33,7 @@ Class Order
 	 *  @param string $order_by 
 	 *  @param string $sort_order 
 	 *  @return void
+	 *  @throws Exception
 	 */
 	public static function setOrder(string $order_by, string $sort_order): void
 	{
