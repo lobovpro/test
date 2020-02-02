@@ -13,7 +13,7 @@ try {
 	// init
 	Core::init($_SERVER['REQUEST_URI']);
 }
-catch (\EngineException $e) {
+catch (\Error $e) {
 	
 	// Critical errors
 	die('Error: '.$e-> getMessage());

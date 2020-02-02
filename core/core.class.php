@@ -32,17 +32,17 @@ class Core
 		// connect DB
 		self::_dbConnect();
 	
-		// use controller
+		// use factory
 		$factory = '\\Test\\C\\Controller';
 		$app = new $factory();
-		$app = $app-> init($controller_name);
 		
-		// method
+		// init controller
 		try {
+			$app = $app-> init($controller_name);
 			$app-> $method_name();
 		} 
 		// errors within a controller
-		catch(\Exception $e) {
+		catch(\Error | \Exception $e) {
 			$data['header'] = 'Error';
 			$data['error'] = $e-> getMessage();
 			$app-> render('error', $data);
